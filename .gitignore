@@ -11,10 +11,6 @@ venv/
 .venv/
 env/
 
-# Model file (large binary — place plant_disease_model.keras in project root)
-*.h5
-*.keras
-
 # Uploaded images (runtime artefacts)
 uploads/*
 !uploads/.gitkeep
