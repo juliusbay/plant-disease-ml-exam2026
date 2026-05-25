@@ -114,28 +114,39 @@ def predict(image_path: str) -> dict:
     }
 
 
+def _class_list_for_template() -> list[dict]:
+    """Return class names grouped by plant for the info modal."""
+    groups: dict[str, list[str]] = {}
+    for name in _STANDARD_38:
+        parts = name.split("___")
+        plant = parts[0].replace("_", " ").strip()
+        condition = parts[1].replace("_", " ").strip() if len(parts) > 1 else name
+        groups.setdefault(plant, []).append(condition)
+    return [{"plant": p, "conditions": c} for p, c in groups.items()]
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
+    classes = _class_list_for_template()
+
     if request.method == "POST":
         file = request.files.get("image")
         if not file or file.filename == "":
-            return render_template("index.html", error="Please select an image file.")
+            return render_template("index.html", error="Please select an image file.", classes=classes)
 
         ext = os.path.splitext(file.filename)[1].lower()
         if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
-            return render_template("index.html", error="Unsupported file type. Use JPG, PNG, or WebP.")
+            return render_template("index.html", error="Unsupported file type. Use JPG, PNG, or WebP.", classes=classes)
 
         filename = f"{uuid.uuid4().hex}{ext}"
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(save_path)
 
         result = predict(save_path)
-        result["image_url"] = url_for("static", filename=f"../uploads/{filename}")
-        # Serve the upload via a dedicated route instead
         result["image_filename"] = filename
-        return render_template("index.html", result=result)
+        return render_template("index.html", result=result, classes=classes)
 
-    return render_template("index.html")
+    return render_template("index.html", classes=classes)
 
 
 @app.route("/uploads/<filename>")

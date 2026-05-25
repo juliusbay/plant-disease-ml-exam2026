@@ -215,6 +215,109 @@
 
     .try-again:hover { text-decoration: underline; }
 
+    /* ── Info button ── */
+    .info-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-top: 1rem;
+      padding: .45rem .9rem;
+      background: none;
+      border: 1.5px solid var(--green-light);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .info-btn:hover { background: var(--green-pale); border-color: var(--accent); }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 40px rgba(0,0,0,.2);
+      width: 100%;
+      max-width: 560px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--green-pale);
+    }
+
+    .modal-header h2 {
+      font-size: 1.1rem;
+      color: var(--green-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--muted);
+      padding: .2rem .4rem;
+      border-radius: 6px;
+    }
+    .modal-close:hover { background: var(--green-pale); color: var(--green-dark); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .plant-group {}
+
+    .plant-name {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--green-mid);
+      margin-bottom: .4rem;
+    }
+
+    .condition-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+
+    .condition-tag {
+      padding: .25rem .65rem;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 500;
+    }
+
+    .tag-healthy  { background: #d1fae5; color: #065f46; }
+    .tag-diseased { background: var(--green-pale); color: var(--green-dark); }
+
     footer {
       margin-top: 3rem;
       color: var(--green-mid);
@@ -229,7 +332,34 @@
   <div class="leaf-icon">🌿</div>
   <h1>Plant Disease Detector</h1>
   <p>Upload a leaf photo to identify diseases instantly</p>
+  <button class="info-btn" onclick="document.getElementById('classes-modal').classList.add('open')">
+    ℹ️ 38 detectable classes
+  </button>
 </header>
+
+<!-- Classes modal -->
+<div class="modal-backdrop" id="classes-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h2 id="modal-title">Detectable Plant Classes</h2>
+      <button class="modal-close" onclick="document.getElementById('classes-modal').classList.remove('open')" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      {% for group in classes %}
+      <div class="plant-group">
+        <div class="plant-name">{{ group.plant }}</div>
+        <div class="condition-tags">
+          {% for condition in group.conditions %}
+          <span class="condition-tag {% if 'healthy' in condition.lower() %}tag-healthy{% else %}tag-diseased{% endif %}">
+            {{ condition }}
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 
 <div class="card">
 
@@ -300,6 +430,14 @@
   const display = document.getElementById('file-name-display');
   input.addEventListener('change', () => {
     display.textContent = input.files[0] ? input.files[0].name : '';
+  });
+
+  const modal = document.getElementById('classes-modal');
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('open');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') modal.classList.remove('open');
   });
 </script>
 
