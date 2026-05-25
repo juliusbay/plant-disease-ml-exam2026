@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Disease Detector</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark:  #1b4332;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --accent:      #40916c;
+      --text:        #1b2d23;
+      --muted:       #6c757d;
+      --white:       #ffffff;
+      --radius:      12px;
+      --shadow:      0 4px 24px rgba(27,67,50,.12);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 50%, #95d5b2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      color: var(--text);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header .leaf-icon {
+      font-size: 3rem;
+      line-height: 1;
+      margin-bottom: .5rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      letter-spacing: -.5px;
+    }
+
+    header p {
+      color: var(--green-mid);
+      margin-top: .4rem;
+      font-size: 1.05rem;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    /* ── Upload form ── */
+    .upload-area {
+      border: 2px dashed var(--green-light);
+      border-radius: var(--radius);
+      padding: 2.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      position: relative;
+    }
+
+    .upload-area:hover { background: var(--green-pale); border-color: var(--accent); }
+
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+    .upload-area p { color: var(--muted); font-size: .95rem; }
+    .upload-area strong { color: var(--green-dark); }
+
+    #file-name-display {
+      margin-top: .6rem;
+      font-size: .9rem;
+      color: var(--accent);
+      font-weight: 500;
+      min-height: 1.2em;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 1.4rem;
+      padding: .85rem;
+      background: var(--green-mid);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      letter-spacing: .3px;
+    }
+
+    .btn:hover  { background: var(--green-dark); }
+    .btn:active { transform: scale(.98); }
+
+    /* ── Error ── */
+    .alert {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      margin-bottom: 1.25rem;
+      color: #856404;
+      font-size: .95rem;
+    }
+
+    /* ── Results ── */
+    .result-section { margin-top: 2rem; }
+
+    .result-section h2 {
+      font-size: 1.3rem;
+      color: var(--green-dark);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 520px) { .result-grid { grid-template-columns: 1fr; } }
+
+    .result-image {
+      width: 100%;
+      border-radius: 10px;
+      object-fit: cover;
+      max-height: 260px;
+      border: 3px solid var(--green-pale);
+    }
+
+    .result-info { display: flex; flex-direction: column; gap: .9rem; }
+
+    .info-chip {
+      background: var(--green-pale);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+    }
+
+    .info-chip .label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--green-mid);
+      margin-bottom: .2rem;
+    }
+
+    .info-chip .value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: .3rem .85rem;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+
+    .badge-healthy  { background: #d1fae5; color: #065f46; }
+    .badge-diseased { background: #fee2e2; color: #991b1b; }
+
+    .confidence-bar-wrap {
+      background: #e9ecef;
+      border-radius: 999px;
+      height: 10px;
+      margin-top: .5rem;
+      overflow: hidden;
+    }
+
+    .confidence-bar {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green-light), var(--green-mid));
+      transition: width .5s ease;
+    }
+
+    .try-again {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--accent);
+      font-size: .95rem;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .try-again:hover { text-decoration: underline; }
+
+    footer {
+      margin-top: 3rem;
+      color: var(--green-mid);
+      font-size: .85rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="leaf-icon">🌿</div>
+  <h1>Plant Disease Detector</h1>
+  <p>Upload a leaf photo to identify diseases instantly</p>
+</header>
+
+<div class="card">
+
+  {% if error %}
+  <div class="alert">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    <div class="upload-area" id="drop-zone">
+      <input type="file" name="image" id="image-input" accept=".jpg,.jpeg,.png,.webp" required />
+      <div class="upload-icon">📷</div>
+      <p><strong>Click to browse</strong> or drag &amp; drop your leaf photo</p>
+      <p>Supported: JPG, PNG, WebP &mdash; max 16 MB</p>
+      <div id="file-name-display"></div>
+    </div>
+    <button type="submit" class="btn">Analyse Plant</button>
+  </form>
+
+  {% if result %}
+  <div class="result-section">
+    <h2>🔬 Detection Result</h2>
+    <div class="result-grid">
+      <img
+        src="{{ url_for('uploaded_file', filename=result.image_filename) }}"
+        alt="Uploaded leaf"
+        class="result-image"
+      />
+      <div class="result-info">
+        <div class="info-chip">
+          <div class="label">Plant</div>
+          <div class="value">{{ result.plant }}</div>
+        </div>
+        <div class="info-chip">
+          <div class="label">Condition</div>
+          <div class="value">{{ result.condition }}</div>
+        </div>
+        <div class="info-chip">
+          <div class="label">Status</div>
+          <div class="value">
+            {% if result.is_healthy %}
+              <span class="status-badge badge-healthy">✓ Healthy</span>
+            {% else %}
+              <span class="status-badge badge-diseased">✗ Diseased</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="info-chip">
+          <div class="label">Confidence</div>
+          <div class="value">{{ result.confidence }}%</div>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar" style="width: {{ result.confidence }}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="/" class="try-again">↩ Analyse another image</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<footer>
+  Powered by MobileNetV2 &bull; Trained on the New Plant Diseases Dataset (38 classes)
+</footer>
+
+<script>
+  const input = document.getElementById('image-input');
+  const display = document.getElementById('file-name-display');
+  input.addEventListener('change', () => {
+    display.textContent = input.files[0] ? input.files[0].name : '';
+  });
+</script>
+
+</body>
+</html>
