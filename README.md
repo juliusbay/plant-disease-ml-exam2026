@@ -1,6 +1,6 @@
 # plant-disease-ml-exam2026
 
-# Plant Disease Classification 🌿
+# Plant Disease Classification 
 
 A deep learning project that classifies plant diseases from leaf images.
 Built as part of the Machine Learning elective course at Erhvervsakademi København.
