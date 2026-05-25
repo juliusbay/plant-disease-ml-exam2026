@@ -11,7 +11,7 @@ venv/
 .venv/
 env/
 
-# Model file (large binary — add manually or via Git LFS)
+# Model file (large binary — place plant_disease_model.keras in project root)
 *.h5
 *.keras
 
