@@ -1,23 +1,23 @@
-# plant-disease-ml-exam2026
+# Plant Disease Classifier
 
-# Plant Disease Classification 
+A deep learning web app that identifies plant diseases from leaf photos.
+Built for the Machine Learning elective at Erhvervsakademi København, Spring 2026.
 
-A deep learning project that classifies plant diseases from leaf images.
-Built as part of the Machine Learning elective course at Erhvervsakademi København.
+## Live Demo
+**http://165.227.128.172/**
 
-## What it does
-Upload a photo of a plant leaf → the model identifies which disease it has (or if it's healthy).
+Upload a leaf photo → the model identifies the disease and confidence level.
+
+## Run Locally
+```bash
+git clone https://github.com/juliusbay/plant-disease-ml-exam2026.git
+cd plant-disease-ml-exam2026
+pip install flask tensorflow pillow numpy
+python app.py
+```
+Then open **http://localhost:5000**
 
 ## Model
-- Architecture: MobileNetV2 (transfer learning)
+- Model: MobileNetV2 (transfer learning)
 - Dataset: New Plant Diseases Dataset (87,000 images, 38 classes)
 - Framework: TensorFlow / Keras
-
-## Results
-- Validation accuracy: (fill in after training)
-
-## How to run
-Open `plant_disease.ipynb` in Google Colab and run all cells.
-
-## Course
-DATA-GBG-E24-V-MAL — Erhvervsakademi København, Spring 2026
